@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { getAllStudents } from "./client.js";
-import { Layout, Menu, Breadcrumb, Table } from 'antd';
+import { Layout, Menu, Breadcrumb, Table, Spin, Empty } from 'antd';
 import {
     DesktopOutlined,
     PieChartOutlined,
     FileOutlined,
     TeamOutlined,
     UserOutlined,
+    LoadingOutlined
 } from '@ant-design/icons';
 
 import './App.css';
@@ -37,16 +38,20 @@ const columns = [
   },
 ];
 
+const antIcon = <LoadingOutlined style={{ fontSize: 24 }} spin />;
+
 function App() {
   const [students, setStudents] = useState([]);
   const [collapsed, setCollapsed] = useState(false);
+  const [fetching, setFetching] = useState(true);
 
   const fetchStudents = () =>
       getAllStudents()
         .then(res => res.json())
         .then(data => {
             console.log(data);
-            setStudents(data)
+            setStudents(data);
+            setFetching(false);
         })
 
   useEffect(() => {
@@ -55,9 +60,20 @@ function App() {
   }, [])
 
   const renderStudents = () => {
-    if (students.length <= 0) return "No data available";
+    if (fetching) {
+        return <Spin indicator={antIcon} />
+    }
+    if (students.length <= 0) return <Empty />;
 
-    return <Table dataSource={students} columns={columns} />;
+    return <Table
+        dataSource={students}
+        columns={columns}
+        bordered
+        title={() => 'Students'}
+        pagination={{ pageSize: 50 }}
+        scroll={{ y: 240 }}
+        rowKey={(student) => student.id}
+    />;
   }
 
     return <Layout style={{ minHeight: '100vh' }}>
@@ -96,7 +112,7 @@ function App() {
                     {renderStudents()}
                 </div>
             </Content>
-            <Footer style={{ textAlign: 'center' }}>Ant Design ©2018 Created by Ant UED</Footer>
+            <Footer style={{ textAlign: 'center' }}>SarvarKhalimov.com ©2022 Created by SarvarKhalimov</Footer>
         </Layout>
     </Layout>
 }
